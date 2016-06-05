@@ -10,16 +10,18 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 def getToken():
-	f = open('/../Data/DiscordToken.txt', 'r')
-	print(f)
-	return f
+	f = open('DiscordToken.txt', 'r')
+	text = f.read()
+	print(text)
+	f.close()
+	return text
 
 client = discord.Client()
 
 #server = client.servers[0]
 #channels = server.channels
 
-token = ''
+#token = ''
 
 server = None
 
@@ -69,7 +71,7 @@ async def on_error(error):
 	print ("##################")
 
 def main():
-	#token = getToken()
+	token = getToken()
 	client.run(token)
 
 
