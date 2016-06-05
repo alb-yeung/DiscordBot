@@ -16,14 +16,16 @@ def getToken():
 	f.close()
 	return text
 
+def getOwnerID():
+	f = open('OwnerID.txt', 'r')
+	text = f.read()
+	f.close()
+	return text
+
 client = discord.Client()
 
 #server = client.servers[0]
 #channels = server.channels
-
-#token = ''
-
-server = None
 
 @client.event
 async def on_ready():
@@ -39,26 +41,37 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	msg = None
+	deleteMessage = False
 	if message.content.startswith('!test'):
+		msg = message
 		print (message.channel.id)
+		print (message.author.id)
 		await client.send_message(message.channel, "Hello world!")
+		deleteMessage = True
 	if message.content.startswith('!joinme'):
+		msg = message
 		if message.author.voice_channel != None:
 			await client.join_voice_channel(message.author.voice_channel)
-			server = message.server
+		deleteMessage = True
 	if message.content.startswith('!leave'):
-		print ("Is server none")
-		print (server != None)
-		print ("--------------")
-		if server != None:
-			if client.is_voice_connected(server):
-				await client.disconnect()
-			server = None
+		msg = message
+		await client.disconnect()
+		deleteMessage = True
 	if message.content.startswith('!changegame'):
-		print (message.content[12:])
-		await client.change_status(game = discord.Game(name = message.content[12:], url = '', type = 0), idle = False)
+		msg = message
+		if (message.author.id == getOwnerID()):
+			print ("Changing game to " + message.content[12:])
+			await client.change_status(game = discord.Game(name = message.content[12:], url = '', type = 0), idle = False)
+		else:
+			await client.send_message(message.channel, "You don't have the permission to change my now playing :upside_down:")
+		deleteMessage = True
 	if message.content.startswith('!setnickname'):
+		msg = message
 		await client.change_nickname(message.author, message.content[13:])
+		deleteMessage = True
+	if deleteMessage:
+		await client.delete_message(msg)
 
 @client.event
 async def on_error(error):
